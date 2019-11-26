@@ -10,34 +10,27 @@ TrackHydrodynamicErrors(problem, should_process, n_steps) = TrackHydrodynamicErr
     should_process,
     n_steps,
     StopCriteria(problem),
-    Vector{NamedTuple{
-        (
-            :timestep,
-            :error_ρ,
-            :error_u,
-            :error_p,
-            :error_σ_xx,
-            :error_σ_xy,
-            :error_σ_yy,
-            :error_σ_yx,
-        ),
-        Tuple{
-            Int64,
-            Float64,
-            Float64,
-            Float64,
-
-            Float64,
-            Float64,
-            Float64,
-            Float64,
-        }
-    }}()
+    Vector{
+        NamedTuple{
+            (
+                :timestep,
+                :error_ρ,
+                :error_u,
+                :error_p,
+                :error_σ_xx,
+                :error_σ_xy,
+                :error_σ_yy,
+                :error_σ_yx,
+            ),
+            Tuple{Int64,Float64,Float64,Float64,
+                Float64,Float64,Float64,Float64},
+        },
+    }(),
 )
 
 
 function next!(process_method::TrackHydrodynamicErrors, q, f_in, t::Int64)
-    if (! process_method.should_process)
+    if (!process_method.should_process)
         if (t != process_method.n_steps)
             return false
         end
@@ -61,8 +54,8 @@ function next!(process_method::TrackHydrodynamicErrors, q, f_in, t::Int64)
 
     time = t * delta_t(problem)
     Δ = Float64(y_range.step) * Float64(x_range.step)
-    @inbounds for x_idx in 1:nx, y_idx in 1:ny
-        @inbounds for f_idx = 1 : size(f_in, 3)
+    @inbounds for x_idx = 1:nx, y_idx = 1:ny
+        @inbounds for f_idx = 1:size(f_in, 3)
             f[f_idx] = f_in[x_idx, y_idx, f_idx]
         end
 
@@ -95,16 +88,19 @@ function next!(process_method::TrackHydrodynamicErrors, q, f_in, t::Int64)
         error_u += Δ * ((u[1] - expected_u[1])^2 + (u[2] - expected_u[2])^2)
     end
 
-    push!(process_method.df, (
-        timestep = t,
-        error_ρ = sqrt(error_ρ),
-        error_u = sqrt(error_u),
-        error_p = sqrt(error_p),
-        error_σ_xx = error_σ_xx,
-        error_σ_xy = error_σ_xy,
-        error_σ_yy = error_σ_yy,
-        error_σ_yx = error_σ_yx,
-    ))
+    push!(
+        process_method.df,
+        (
+            timestep = t,
+            error_ρ = sqrt(error_ρ),
+            error_u = sqrt(error_u),
+            error_p = sqrt(error_p),
+            error_σ_xx = error_σ_xx,
+            error_σ_xy = error_σ_xy,
+            error_σ_yy = error_σ_yy,
+            error_σ_yx = error_σ_yx,
+        ),
+    )
 
     if mod(t, 100) == 0
         if (should_stop!(process_method.stop_criteria, q, f_in))
@@ -128,13 +124,7 @@ function next!(process_method::TrackHydrodynamicErrors, q, f_in, t::Int64)
 
         if (should_visualize)
             Δt = delta_t(process_method.problem)
-            visualize(
-                process_method.problem,
-                q,
-                f_in,
-                time,
-                process_method.df
-            )
+            visualize(process_method.problem, q, f_in, time, process_method.df)
         end
     end
 

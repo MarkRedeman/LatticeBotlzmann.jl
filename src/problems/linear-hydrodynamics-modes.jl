@@ -30,7 +30,7 @@ struct LinearizedThermalDiffusion <: FluidFlowProblem
     ν::Float64
     κ::Float64
 
-    domain_size::Tuple{Float64, Float64}
+    domain_size::Tuple{Float64,Float64}
 
     u_max::Float64
     NX::Int64
@@ -42,7 +42,6 @@ function LinearizedThermalDiffusion(ν, κ, scale, NY = 4 * scale)
     return LinearizedThermalDiffusion(
         1.0,
         1.0,
-
         0.001,
         0.001,
 
@@ -54,7 +53,7 @@ function LinearizedThermalDiffusion(ν, κ, scale, NY = 4 * scale)
         u_max,
         # 3,
         NY,
-        NY
+        NY,
     )
 end
 
@@ -63,14 +62,26 @@ function delta_x(problem::LinearizedThermalDiffusion)
 end
 
 
-function density(q::Quadrature, problem::LinearizedThermalDiffusion, x::Float64, y::Float64, timestep::Float64 = 0.0)
+function density(
+    q::Quadrature,
+    problem::LinearizedThermalDiffusion,
+    x::Float64,
+    y::Float64,
+    timestep::Float64 = 0.0,
+)
     ρ_0 = problem.ρ_0
     ρ̃ = problem.ρ̃
 
-    return ρ_0 + ρ̃ * sin(y) * exp(- heat_diffusion(problem) * timestep)
+    return ρ_0 + ρ̃ * sin(y) * exp(-heat_diffusion(problem) * timestep)
 end
 
-function pressure(q::Quadrature, problem::LinearizedThermalDiffusion, x::Float64, y::Float64, timestep::Float64 = 0.0)
+function pressure(
+    q::Quadrature,
+    problem::LinearizedThermalDiffusion,
+    x::Float64,
+    y::Float64,
+    timestep::Float64 = 0.0,
+)
     ρ_0 = problem.ρ_0
     θ_0 = problem.θ_0
 
@@ -80,7 +91,12 @@ function pressure(q::Quadrature, problem::LinearizedThermalDiffusion, x::Float64
     return ρ_0 * θ_0
 end
 
-function velocity(problem::LinearizedThermalDiffusion, x::Float64, y::Float64, timestep::Float64 = 0.0)
+function velocity(
+    problem::LinearizedThermalDiffusion,
+    x::Float64,
+    y::Float64,
+    timestep::Float64 = 0.0,
+)
     return [
         0.0
         0.0
@@ -106,7 +122,7 @@ struct LinearizedTransverseShearWave <: FluidFlowProblem
     ν::Float64
     κ::Float64
 
-    domain_size::Tuple{Float64, Float64}
+    domain_size::Tuple{Float64,Float64}
 
     u_max::Float64
     NX::Int64
@@ -118,7 +134,6 @@ function LinearizedTransverseShearWave(ν, κ, scale, NY = 8 * scale)
     return LinearizedTransverseShearWave(
         1.0,
         1.0,
-
         0.001,
         0.001,
 
@@ -129,7 +144,7 @@ function LinearizedTransverseShearWave(ν, κ, scale, NY = 8 * scale)
 
         u_max,
         NY,
-        NY
+        NY,
     )
 end
 
@@ -138,17 +153,34 @@ function delta_x(problem::LinearizedTransverseShearWave)
 end
 
 
-function density(q::Quadrature, problem::LinearizedTransverseShearWave, x::Float64, y::Float64, timestep::Float64 = 0.0)
+function density(
+    q::Quadrature,
+    problem::LinearizedTransverseShearWave,
+    x::Float64,
+    y::Float64,
+    timestep::Float64 = 0.0,
+)
     return problem.ρ_0
 end
 
-function pressure(q::Quadrature, problem::LinearizedTransverseShearWave, x::Float64, y::Float64, timestep::Float64 = 0.0)
+function pressure(
+    q::Quadrature,
+    problem::LinearizedTransverseShearWave,
+    x::Float64,
+    y::Float64,
+    timestep::Float64 = 0.0,
+)
     return problem.θ_0
 end
 
-function velocity(problem::LinearizedTransverseShearWave, x::Float64, y::Float64, timestep::Float64 = 0.0)
+function velocity(
+    problem::LinearizedTransverseShearWave,
+    x::Float64,
+    y::Float64,
+    timestep::Float64 = 0.0,
+)
     return [
-        problem.ũ * sin(y) * exp(- viscosity(problem) * timestep)
+        problem.ũ * sin(y) * exp(-viscosity(problem) * timestep)
         0.0
     ]
 end

@@ -5,7 +5,7 @@ import LinearAlgebra: I, tr
 
     scale = 1
     ν = 1.0 / 6.0
-    problem = TaylorGreenVortexExample(ν, scale,)
+    problem = TaylorGreenVortexExample(ν, scale)
     f = lbm.initialize(q, problem)
 
     ρ = lbm.density(q, f)
@@ -19,11 +19,7 @@ import LinearAlgebra: I, tr
         D = dimension(q)
         N = div(lbm.order(q), 2)
         Hs = [
-            [
-                hermite(Val{n}, q.abscissae[:, i], q)
-                for i = 1:length(q.weights)
-            ]
-            for n = 1:N
+            [hermite(Val{n}, q.abscissae[:, i], q) for i = 1:length(q.weights)] for n = 1:N
         ]
 
         scale = 1
@@ -40,10 +36,7 @@ import LinearAlgebra: I, tr
         τ = problem.ν
         τ = q.speed_of_sound_squared * lbm.lattice_viscosity(problem) + 0.5
 
-        a_f = [
-            sum([f[idx] * Hs[n][idx] for idx = 1:length(q.weights)])
-            for n = 1:N
-        ]
+        a_f = [sum([f[idx] * Hs[n][idx] for idx = 1:length(q.weights)]) for n = 1:N]
 
         @show a_f[2]
         P = a_f[2] - (a_f[1] * a_f[1]') / ρ - ρ * I(2)
@@ -90,11 +83,13 @@ import LinearAlgebra: I, tr
         τ = q.speed_of_sound_squared * lbm.lattice_viscosity(problem) + 0.5
         @show τ
         for f_idx = 1:length(f)
-            f[f_idx] += - (q.weights[f_idx] * ρ * τ / cs) * sum(lbm.hermite(Val{2}, q.abscissae[:, f_idx], q) .* d_u)
+            f[f_idx] +=
+                -(q.weights[f_idx] * ρ * τ / cs) *
+                sum(lbm.hermite(Val{2}, q.abscissae[:, f_idx], q) .* d_u)
         end
-        @show 1/delta_t(problem)
-        @show 1/lbm.delta_x(problem)
-        @show 1/viscosity(problem)
+        @show 1 / delta_t(problem)
+        @show 1 / lbm.delta_x(problem)
+        @show 1 / viscosity(problem)
 
 
         j = lbm.momentum(q, f)
@@ -103,13 +98,17 @@ import LinearAlgebra: I, tr
         @show lbm.momentum_flux(q, f, ρ, u)
         @show lbm.pressure(q, f, ρ, u)
 
-        @show - (q.speed_of_sound_squared / problem.ν) * (lbm.momentum_flux(q, f, ρ, u) - I(2) * lbm.pressure(q, f, ρ, u)) ./ problem.u_max
+        @show -(
+            q.speed_of_sound_squared / problem.ν
+        ) * (lbm.momentum_flux(q, f, ρ, u) - I(2) * lbm.pressure(q, f, ρ, u)) ./
+              problem.u_max
         @show ρ * u * u'
 
         @show lbm.deviatoric_tensor(q, problem, x, y, 0.0)
         # @show lbm.pressure_tensor(q, problem, x, y, 0.0)
         @show problem.u_max
-        @show lbm.pressure_tensor(q, problem, x, y, 0.0) - lbm.deviatoric_tensor(q, problem, x, y, 0.0)
+        @show lbm.pressure_tensor(q, problem, x, y, 0.0) -
+              lbm.deviatoric_tensor(q, problem, x, y, 0.0)
         @show lbm.pressure(q, f, ρ, u) - lbm.pressure(q, problem, x, y, 0.0)
 
 
@@ -118,7 +117,7 @@ import LinearAlgebra: I, tr
         σ = lbm.deviatoric_tensor(q, problem, x, y, 0.0)
         @show σ_lb σ
         @show (1 - 1 / (2 * τ))
-        @show 0.5 * (1/cs) * (1 / problem.u_max) * σ_lb / (1 - 1 / (2 * τ))
+        @show 0.5 * (1 / cs) * (1 / problem.u_max) * σ_lb / (1 - 1 / (2 * τ))
         # @show (1 / (problem.ν^2 * problem.u_max)) * σ_lb / (1 + 1 / (2 * problem.ν))
         # @show (q.speed_of_sound_squared / (problem.ν * problem.u_max) ) * (
         #     σ_lb

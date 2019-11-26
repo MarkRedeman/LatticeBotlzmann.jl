@@ -8,8 +8,10 @@ end
 StopCriteria(problem::FluidFlowProblem) = NoStoppingCriteria()
 StopCriteria(problem::PoiseuilleFlow) = MeanVelocityStoppingCriteria(0.0, 1e-12, problem)
 StopCriteria(problem::CouetteFlow) = MeanVelocityStoppingCriteria(0.0, 1e-12, problem)
-StopCriteria(problem::LidDrivenCavityFlow) = MeanVelocityStoppingCriteria(0.0, 1e-5, problem)
-StopCriteria(problem::DecayingShearFlow) = problem.static ? MeanVelocityStoppingCriteria(0.0, 1e-8, problem) : NoStoppingCriteria()
+StopCriteria(problem::LidDrivenCavityFlow) =
+    MeanVelocityStoppingCriteria(0.0, 1e-5, problem)
+StopCriteria(problem::DecayingShearFlow) =
+    problem.static ? MeanVelocityStoppingCriteria(0.0, 1e-8, problem) : NoStoppingCriteria()
 
 should_stop!(::StopCriteria, q, f_in) = false
 function should_stop!(stop_criteria::MeanVelocityStoppingCriteria, q, f_in)
@@ -21,11 +23,11 @@ function should_stop!(stop_criteria::MeanVelocityStoppingCriteria, q, f_in)
     divide_by = 0
     u_mean = 0.0
 
-    @inbounds for x_idx in 1:Nx, y_idx in 1:Ny
+    @inbounds for x_idx = 1:Nx, y_idx = 1:Ny
         divide_by += 1
 
         # Calculated
-        @inbounds for f_idx = 1 : size(f_in, 3)
+        @inbounds for f_idx = 1:size(f_in, 3)
             f[f_idx] = f_in[x_idx, y_idx, f_idx]
         end
         ρ = density(q, f)

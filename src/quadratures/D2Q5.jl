@@ -5,22 +5,22 @@
 
 # From: E3,1,5
 struct D2Q5 <: Quadrature
-    abscissae::Array{Int64, 2}
-    weights::Array{Float64, 1}
+    abscissae::Array{Int64,2}
+    weights::Array{Float64,1}
     speed_of_sound_squared::Float64
 end
 
-D2Q5() = D2Q5(
-    [
-        0   1   0  -1   0
-        0   0   1   0  -1
-    ],
-    [
-        4/6, 1/12, 1/12, 1/12, 1/12
+D2Q5() = D2Q5([
+    0 1 0 -1 0
+    0 0 1 0 -1
+], [
+    4 / 6,
+    1 / 12,
+    1 / 12,
+    1 / 12,
+    1 / 12,
         # 1/3, 1/6, 1/6, 1/6, 1/6
-    ],
-    6.0
-)
+], 6.0)
 
 order(q::D2Q5) = 3
 function opposite(q::D2Q5, idx::Int64)
@@ -33,10 +33,10 @@ function opposite(q::D2Q5, idx::Int64)
     return idx - 2
 end
 
-Base.show(io::IO, q::D2Q5)= show(io, "D2Q5")
+Base.show(io::IO, q::D2Q5) = show(io, "D2Q5")
 
 # The D2Q5 lattice is unable to include temperature
-pressure(q::D2Q5, f::Array{Float64}, ρ::Float64, u::Array{Float64, 1}) = 1.0
+pressure(q::D2Q5, f::Array{Float64}, ρ::Float64, u::Array{Float64,1}) = 1.0
 
 function _equilibrium(q::D2Q5, ρ, weight, u_dot_xi, u_squared, T, xi_squared)
     cs = q.speed_of_sound_squared

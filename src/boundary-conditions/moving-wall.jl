@@ -2,7 +2,7 @@
 The MovingWall boundary condition applies a bounce back rule and adds a velocity
 to each distribution that is bounced back
 """
-struct MovingWall{D <: Direction, Ints} <: BoundaryCondition
+struct MovingWall{D<:Direction,Ints} <: BoundaryCondition
     direction::D
     xs::Ints
     ys::Ints

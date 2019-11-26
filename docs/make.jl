@@ -5,9 +5,7 @@ makedocs(
     format = :html,
     checkdocs = :exports,
     sitename = "lbm.jl",
-    pages = Any["index.md"]
+    pages = Any["index.md"],
 )
 
-deploydocs(
-    repo = "github.com/MarkRedeman/lbm.jl.git",
-)
+deploydocs(repo = "github.com/MarkRedeman/lbm.jl.git")

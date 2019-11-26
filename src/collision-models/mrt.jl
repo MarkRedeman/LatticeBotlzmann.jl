@@ -3,9 +3,9 @@ struct MRT{Force} <: CollisionModel
 
     # We will be using Hermite polynomials to compute the corresponding coefficients
     H0::Float64
-    Hs::Array{Array{T, 1} where T}
+    Hs::Array{Array{T,1} where T}
     # Keep higher order coefficients allocated
-    As::Array{Array{T, 1} where T}
+    As::Array{Array{T,1} where T}
 
     force::Force
 end
@@ -22,28 +22,12 @@ end
 
 function MRT(q::Quadrature, τs::Vector{Float64}, force = nothing)
     N = round(Int, order(q) / 2)
-    Hs = [
-        [
-            hermite(Val{n}, q.abscissae[:, i], q)
-            for i = 1:length(q.weights)
-        ]
-        for n = 1:N
-    ]
+    Hs = [[hermite(Val{n}, q.abscissae[:, i], q) for i = 1:length(q.weights)] for n = 1:N]
 
-    MRT(
-        τs,
-        1.0,
-        Hs,
-        copy(Hs),
-        force
-    )
+    MRT(τs, 1.0, Hs, copy(Hs), force)
 end
 
-function CollisionModel(
-    cm::Type{<:MRT},
-    q::Quadrature,
-    problem::FluidFlowProblem
-)
+function CollisionModel(cm::Type{<:MRT}, q::Quadrature, problem::FluidFlowProblem)
     τ = q.speed_of_sound_squared * lattice_viscosity(problem) + 0.5
     τs = fill(τ, order(q))
 
@@ -69,7 +53,7 @@ function collide_mrt!(
     f_in,
     f_out;
     time = 0.0,
-) where { CM <: CollisionModel }
+) where {CM<:CollisionModel}
     @info "Using a special collision operator"
     cs = q.speed_of_sound_squared
     τs = cm.τs
@@ -78,28 +62,19 @@ function collide_mrt!(
     N = div(lbm.order(q), 2)
 
     # Compute (get!?) the hermite polynomials for this quadrature
-    Hs = [
-        [
-            hermite(Val{n}, q.abscissae[:, i], q)
-            for i = 1:length(q.weights)
-        ]
-        for n = 1:N
-    ]
+    Hs = [[hermite(Val{n}, q.abscissae[:, i], q) for i = 1:length(q.weights)] for n = 1:N]
 
     nx, ny, nf = size(f_in)
 
     f = Array{Float64}(undef, nf)
     u = zeros(dimension(q))
-    @inbounds for x_idx = 1 : nx, y_idx = 1 : ny
-        @inbounds for f_idx = 1 : nf
+    @inbounds for x_idx = 1:nx, y_idx = 1:ny
+        @inbounds for f_idx = 1:nf
             f[f_idx] = f_in[x_idx, y_idx, f_idx]
         end
 
         # NOTE: we could optimize this by only computing upto n = 2 when τ = 1.0
-        a_f = [
-            sum([f[idx] * Hs[n][idx] for idx = 1:length(q.weights)])
-            for n = 1:N
-        ]
+        a_f = [sum([f[idx] * Hs[n][idx] for idx = 1:length(q.weights)]) for n = 1:N]
 
         ρ = density(q, f)
         velocity!(q, f, ρ, u)
@@ -108,25 +83,17 @@ function collide_mrt!(
 
         # NOTE: we don't need to compute the 0th and 1st coefficient as these are equal
         # to a_f[0] and a_f[1]
-        a_eq = [
-            equilibrium_coefficient(Val{n}, q, ρ, u, T)
-            for n = 1:N
-        ]
+        a_eq = [equilibrium_coefficient(Val{n}, q, ρ, u, T) for n = 1:N]
 
-        a_coll = [
-            (1 - 1 / τs[n]) .* a_f[n] .+ (1 / τs[n]) .* a_eq[n]
-            for n = 1:N
-        ]
+        a_coll = [(1 - 1 / τs[n]) .* a_f[n] .+ (1 / τs[n]) .* a_eq[n] for n = 1:N]
 
-        @inbounds for f_idx = 1 : nf
-            f_out[x_idx, y_idx, f_idx] = q.weights[f_idx] * (
-                ρ +
-                cs * ρ * sum(u .* Hs[1][f_idx]) +
-                sum([
-                    cs^n * dot(a_coll[n], Hs[n][f_idx]) / (factorial(n))
-                    for n = 2:N
-                ])
-            )
+        @inbounds for f_idx = 1:nf
+            f_out[x_idx, y_idx, f_idx] =
+                q.weights[f_idx] * (
+                    ρ +
+                    cs * ρ * sum(u .* Hs[1][f_idx]) +
+                    sum([cs^n * dot(a_coll[n], Hs[n][f_idx]) / (factorial(n)) for n = 2:N])
+                )
         end
     end
     return

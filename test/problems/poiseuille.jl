@@ -13,7 +13,7 @@
     u = zeros(dimension(q))
 
 
-    for x_idx = 2, y_idx = 1 : size(f_in, 2)
+    for x_idx in 2, y_idx = 1:size(f_in, 2)
         f = f_in[x_idx, y_idx, :]
 
         ρ = lbm.density(q, f)
@@ -62,7 +62,7 @@
     # @show "after boundary"
     # @show f_out[2, 1, :] .- f_out[2, o, :]
     # @show f_out
-      
+
         # stream!(quadrature, f_out, f_in)
     lbm.stream!(q, f_new = f_in, f_old = f_out)
     # lbm.stream!(q, f_out, f_in)
@@ -77,7 +77,7 @@
     # @show f_in[:, :, 6]
     # @show f_in[:, :, 8]
 
-    for x_idx = 2, y_idx = 1 : size(f_in, 2)
+    for x_idx in 2, y_idx = 1:size(f_in, 2)
         f = f_in[x_idx, y_idx, :]
 
         ρ = lbm.density(q, f)
@@ -92,7 +92,7 @@
     # @show f_in[4, p, :]
     # @show f_in[4, 2, :] .- f_in[4, p, :]
     # @show "First step"
-    for x_idx = 2, y_idx = 1 : size(f_in, 2)
+    for x_idx in 2, y_idx = 1:size(f_in, 2)
         f = f_in[x_idx, y_idx, :]
 
         ρ = lbm.density(q, f)

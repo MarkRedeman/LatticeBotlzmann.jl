@@ -4,11 +4,7 @@ struct SRT{Force} <: CollisionModel
 end
 SRT(τ) = SRT(τ, nothing)
 
-function CollisionModel(
-    cm::Type{<:SRT},
-    q::Quadrature,
-    problem::FluidFlowProblem
-)
+function CollisionModel(cm::Type{<:SRT}, q::Quadrature, problem::FluidFlowProblem)
     τ = q.speed_of_sound_squared * lattice_viscosity(problem) + 0.5
 
     if has_external_force(problem)
@@ -24,20 +20,20 @@ function collide!(
     q::Quadrature,
     f_in,
     f_out;
-    time = 0.0
+    time = 0.0,
 ) where {Force}
     τ = collision_model.τ
 
     feq = Array{Float64}(undef, size(f_in, 3))
     f = Array{Float64}(undef, size(f_in, 3))
     u = zeros(dimension(q))
-    if ! (Force <: Nothing)
+    if !(Force <: Nothing)
         F = zeros(dimension(q))
     end
 
     nx, ny, nf = size(f_in)
-    @inbounds for x = 1 : nx, y = 1 : ny
-        @inbounds for f_idx = 1 : nf
+    @inbounds for x = 1:nx, y = 1:ny
+        @inbounds for f_idx = 1:nf
             f[f_idx] = f_in[x, y, f_idx]
         end
 
@@ -51,15 +47,15 @@ function collide!(
         T = 1.0
 
         if Force <: Nothing
-            equilibrium!(q, ρ, u, T, feq);
+            equilibrium!(q, ρ, u, T, feq)
         else
             F .= collision_model.force(x, y, time)
 
-            equilibrium!(q, ρ, u + τ * F, T, feq);
+            equilibrium!(q, ρ, u + τ * F, T, feq)
         end
 
-        @inbounds for f_idx = 1 : nf
-            f_out[x, y, f_idx] = (1 - 1 / τ) * f[f_idx] + (1 / τ) * feq[f_idx];
+        @inbounds for f_idx = 1:nf
+            f_out[x, y, f_idx] = (1 - 1 / τ) * f[f_idx] + (1 / τ) * feq[f_idx]
         end
     end
     return

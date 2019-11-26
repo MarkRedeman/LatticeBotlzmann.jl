@@ -10,12 +10,11 @@
 
     @testset "Symmetry $n" for n = 1:div(lbm.order(q), 2)
         H = sum([
-            q.weights[f_idx] *
-            hermite(n, q.abscissae[:, f_idx], q)
+            q.weights[f_idx] * hermite(n, q.abscissae[:, f_idx], q)
             for f_idx = 1:length(q.weights)
         ])
 
-        @test all(isapprox.(H, 0.0, atol=1e-15))
+        @test all(isapprox.(H, 0.0, atol = 1e-15))
     end
 end
 
@@ -26,12 +25,12 @@ end
     T = fill(1.0, N, N)
 
     @testset "equilibira" begin
-        f = lbm.equilibrium(q, ρ, u, T);
+        f = lbm.equilibrium(q, ρ, u, T)
 
         @test all(lbm.density(q, f) .≈ ρ)
 
         @test all(lbm.momentum(q, f) ./ ρ .≈ u)
-        @test all(isapprox.(lbm.temperature(q, f, ρ, u), T, atol=1e-5))
+        @test all(isapprox.(lbm.temperature(q, f, ρ, u), T, atol = 1e-5))
         # @code_warntype lbm.equilibrium(q, ρ, u, T)
         @inferred lbm.equilibrium(q, ρ, u, T)
     end
@@ -41,7 +40,7 @@ end
         ρ = fill(1.0, N, N)
         u = fill(0.0, N, N, lbm.dimension(q))
         T = fill(1.0, N, N)
-        f = lbm.equilibrium(q, ρ, u, T);
+        f = lbm.equilibrium(q, ρ, u, T)
         # @show lbm.temperature(q, f, ρ, u) * q.speed_of_sound_squared
         @test all(lbm.temperature(q, f, ρ, u) .≈ T)
     end
@@ -50,7 +49,7 @@ end
         ρ = 1.0
         u = [0.1, 0.1]
         T = 1.0
-        f = lbm.equilibrium(q, ρ, u, T);
+        f = lbm.equilibrium(q, ρ, u, T)
 
         @test lbm.density(q, f) ≈ ρ
         @test all(lbm.momentum(q, f) ./ ρ .≈ u)
@@ -69,7 +68,7 @@ end
         u = fill(0.01, N, N, lbm.dimension(q))
         T = fill(1.05, N, N)
 
-        f = lbm.equilibrium(q, ρ, u, T);
+        f = lbm.equilibrium(q, ρ, u, T)
         f_out = copy(f)
         # @show q.speed_of_sound_squared
         # @show 1 / q.speed_of_sound_squared
@@ -89,10 +88,10 @@ end
         ρ_ = lbm.density(q, f_)
         lbm.velocity!(q, f_, ρ_, u_)
         T_ = lbm.temperature(q, f_, ρ_, u_)
-        @test all(isapprox(f, f_out, atol=1e-4))
+        @test all(isapprox(f, f_out, atol = 1e-4))
 
-        @inferred lbm.equilibrium(q, ρ, u, T);
-        @inferred lbm.equilibrium(q, ρ, u, 1.0);
+        @inferred lbm.equilibrium(q, ρ, u, T)
+        @inferred lbm.equilibrium(q, ρ, u, 1.0)
         # @code_warntype lbm.equilibrium(q, ρ, u, 1.0);
         # @code_warntype collide(collision_model, q, f)
         @inferred lbm.collide!(SRT(1.0), q, f_old = f, f_new = f_out, time = 0.0)
@@ -104,7 +103,7 @@ end
         u = fill(0.1, N, N, lbm.dimension(q))
         T = fill(1.0, N, N)
 
-        f = lbm.equilibrium(q, ρ, u, T);
+        f = lbm.equilibrium(q, ρ, u, T)
 
         f_inn = copy(f)
         f_out = copy(f)
@@ -115,7 +114,7 @@ end
             lbm.stream!(q, f_new = f_inn, f_old = f_out)
         end
 
-        @test all(isapprox.(f, f_inn, atol=1e-5))
+        @test all(isapprox.(f, f_inn, atol = 1e-5))
 
         # @test all(isapprox.(H, 0.0))
     end

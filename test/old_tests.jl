@@ -5,7 +5,7 @@
 
     @test sum(LBM.weights) ≈ 1.0
     @test LBM.density(LBM.weights) ≈ 1.0
-    @test LBM.velocity(LBM.weights) ≈[0.0, 0.0]
+    @test LBM.velocity(LBM.weights) ≈ [0.0, 0.0]
 
     # When constructing an equilibrium function, it should have
     # conserve the density and velocity that were used constructing it
@@ -33,36 +33,48 @@
         @testset "equilibrium distributions should remain in equilibrium" begin
             f = LBM.equilibrium(1.0, [0.0, 0.0])
 
-            @test LBM.collide(f, 1.) ≈ f
+            @test LBM.collide(f, 1.0) ≈ f
         end
 
         # Create a distribution that is perturbed
-        f = LBM.equilibrium(1.0, [0.0, 0.0]);
-        f[7] *= 3;
+        f = LBM.equilibrium(1.0, [0.0, 0.0])
+        f[7] *= 3
         f[:] = f[:] / sum(f)
         @test LBM.velocity(f) ≈ [1.0 / 5.5, 0.0]
         @test f ≉ LBM.equilibrium(f)
         @test copy(f) ≉ LBM.collide(f, 1.1)
 
         # Check that we can collide multiple distributions using broadcastign
-        fs = [LBM.equilibrium(1.0, [0.0, 0.0]) for x = 1:10, y=1:10]
-        @test isapprox(norm((fs .- LBM.collide.(fs, 1.))[:]), 0, atol=1e-14)
+        fs = [LBM.equilibrium(1.0, [0.0, 0.0]) for x = 1:10, y = 1:10]
+        @test isapprox(norm((fs.-LBM.collide.(fs, 1.0))[:]), 0, atol = 1e-14)
     end
 
     @testset "streaming" begin
         f = LBM.equilibrium(1.0, [0.0, 0.0])
 
-        @test LBM.stream([[1, 2, 3] [4, 5, 6] [7, 8, 9]], [0, 0]) == [[1, 2, 3] [4, 5, 6] [7, 8, 9]]
-        @test LBM.stream([[1, 2, 3] [4, 5, 6] [7, 8, 9]], [0, 1]) == [[7, 8, 9] [1, 2, 3] [4, 5, 6]]
-        @test LBM.stream([[1, 2, 3] [4, 5, 6] [7, 8, 9]], [1, 0]) == [[3, 1, 2] [6, 4, 5] [9, 7, 8]]
-        @test LBM.stream([[1, 2, 3] [4, 5, 6] [7, 8, 9]], [1, 1]) == [[9, 7, 8] [3, 1, 2] [6, 4, 5]]
+        @test LBM.stream(
+            [[1, 2, 3] [4, 5, 6] [7, 8, 9]],
+            [0, 0],
+        ) == [[1, 2, 3] [4, 5, 6] [7, 8, 9]]
+        @test LBM.stream(
+            [[1, 2, 3] [4, 5, 6] [7, 8, 9]],
+            [0, 1],
+        ) == [[7, 8, 9] [1, 2, 3] [4, 5, 6]]
+        @test LBM.stream(
+            [[1, 2, 3] [4, 5, 6] [7, 8, 9]],
+            [1, 0],
+        ) == [[3, 1, 2] [6, 4, 5] [9, 7, 8]]
+        @test LBM.stream(
+            [[1, 2, 3] [4, 5, 6] [7, 8, 9]],
+            [1, 1],
+        ) == [[9, 7, 8] [3, 1, 2] [6, 4, 5]]
 
 
         # Check that if we have a 2x2 square with periodic boundaries then
         # streaming twice should give the same result as no streaming
         for size = 2:10
             fs = [LBM.equilibrium(1.0, [Float64(x), Float64(y)]) for x = 1:size, y = 1:size]
-            const original = deepcopy(fs);
+            const original = deepcopy(fs)
 
             for idx = 1:size
                 fs = LBM.stream(fs)
@@ -77,7 +89,7 @@
         const U = 0.05
         const lx, ly = 10, 10
         const ν = U * lx / Re
-        const ω = 1. / (3 * ν + 1/2.)
+        const ω = 1.0 / (3 * ν + 1 / 2.0)
 
         ρ, u = 1.0, [0.0, 0.0]
         fs = [LBM.equilibrium(ρ, u) for x = 1:lx, y = 1:ly]
@@ -97,7 +109,7 @@
             end
 
             @test sum(LBM.density.(fs)) ≈ original_density
-            @test isapprox(sum(LBM.velocity.(fs)), original_velocity, atol=1e-16)
+            @test isapprox(sum(LBM.velocity.(fs)), original_velocity, atol = 1e-16)
         end
 
         # # 100x100 1000
@@ -134,8 +146,9 @@
             end
 
             # STREAMING STEP
-            for idx=1:9
-                fs_as_array[idx, :, :] = LBM.stream(fs_as_array[idx, :, :], LBM.abscissae[:, idx])
+            for idx = 1:9
+                fs_as_array[idx, :, :] =
+                    LBM.stream(fs_as_array[idx, :, :], LBM.abscissae[:, idx])
             end
         end
         @test sum(fs_as_array) ≈ original_density
@@ -148,7 +161,7 @@
 
         abscissae = LBM.abscissae
 
-        for idx = 2 : 5
+        for idx = 2:5
             @test abscissae[1, idx] < 0 || (abscissae[1, idx] == 0 && abscissae[2, idx] < 0)
         end
 

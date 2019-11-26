@@ -4,8 +4,8 @@
 # Same as D2Q17, but vertical and horizontal vectors are extended by one
 
 struct D2Q21 <: Quadrature
-    abscissae::Array{Int64, 2}
-    weights::Array{Float64, 1}
+    abscissae::Array{Int64,2}
+    weights::Array{Float64,1}
     speed_of_sound_squared::Float64
 end
 function D2Q21()
@@ -30,15 +30,39 @@ function D2Q21()
 
     return D2Q21(
         [   #A #B          #C          #D          #E          #F
-            0  1 -1  0  0  1 -1  1 -1  2 -2  0  0  2 -2  2 -2  3 -3  0  0  3 -3 -3  3
-            0  0  0  1 -1  1 -1 -1  1  0  0  2 -2  2 -2 -2  2  0  0  3 -3  3 -3  3 -3
+            0 1 -1 0 0 1 -1 1 -1 2 -2 0 0 2 -2 2 -2 3 -3 0 0 3 -3 -3 3
+            0 0 0 1 -1 1 -1 -1 1 0 0 2 -2 2 -2 -2 2 0 0 3 -3 3 -3 3 -3
         ],
         [
-            w_0, w_1, w_1, w_1, w_1, w_2, w_2, w_2, w_2, w_3, w_3, w_3, w_3, w_4, w_4, w_4, w_4, w_5, w_5, w_5, w_5, w_6, w_6, w_6, w_6
+            w_0,
+            w_1,
+            w_1,
+            w_1,
+            w_1,
+            w_2,
+            w_2,
+            w_2,
+            w_2,
+            w_3,
+            w_3,
+            w_3,
+            w_3,
+            w_4,
+            w_4,
+            w_4,
+            w_4,
+            w_5,
+            w_5,
+            w_5,
+            w_5,
+            w_6,
+            w_6,
+            w_6,
+            w_6,
         ],
-        cs
+        cs,
     )
 end
 
 order(q::D2Q21) = 7
-Base.show(io::IO, q::D2Q21)= show(io, "D2Q21")
+Base.show(io::IO, q::D2Q21) = show(io, "D2Q21")

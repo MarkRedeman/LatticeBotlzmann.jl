@@ -1,17 +1,13 @@
 abstract type InitializationStrategy2 end
 InitializationStrategy(problem) = FromEquilibrium2()
 
-struct ZeroInitialCondition2 <: InitializationStrategy2
-end
+struct ZeroInitialCondition2 <: InitializationStrategy2 end
 
-struct FromEquilibrium2 <: InitializationStrategy2
-end
+struct FromEquilibrium2 <: InitializationStrategy2 end
 
-struct WithNonEquilibrium2 <: InitializationStrategy2
-end
+struct WithNonEquilibrium2 <: InitializationStrategy2 end
 
-struct MeiEtAl2 <: InitializationStrategy2
-end
+struct MeiEtAl2 <: InitializationStrategy2 end
 
 # function initial_equilibrium(quadrature::Quadrature, problem::FluidFlowProblem, x::Float64, y::Float64)
 #     return equilibrium(

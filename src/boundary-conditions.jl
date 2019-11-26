@@ -3,7 +3,13 @@ abstract type BoundaryCondition end
 """
 Apply a group of boundary conditions after streaming
 """
-function apply!(boundary_conditions::Vector{<:BoundaryCondition}, q::Quadrature, f_new, f_old; time = 0.0)
+function apply!(
+    boundary_conditions::Vector{<:BoundaryCondition},
+    q::Quadrature,
+    f_new,
+    f_old;
+    time = 0.0,
+)
     for boundary_condition in boundary_conditions
         apply!(boundary_condition, q, f_new, f_old, time = time)
     end
