@@ -33,45 +33,59 @@ function hermite_based_equilibrium!(q::Q, ρ, u, T, f) where {Q <: Quadrature}
 end
 
 # equilibrium(Val{1}, ρ, u, T)
-
-function equilibrium_coefficient(::Type{Val{0}}, q::Quadrature, ρ, u, T)
-    return ρ
+function equilibrium_coefficient(n::Type{Val{N}}, q::Quadrature, ρ, u, T) where N
+    D = dimension(q)
+    return equilibrium_coefficient!(n, q, ρ, u, T, zeros(ntuple(x -> D, N)))
 end
 
-function equilibrium_coefficient(::Type{Val{1}}, q::Quadrature, ρ, u, T)
-    return ρ * u
+function equilibrium_coefficient!(::Type{Val{0}}, q::Quadrature, ρ, u, T, a_n)
+    a_n = ρ
 end
 
-function equilibrium_coefficient(::Type{Val{2}}, q::Quadrature, ρ, u, T)
+function equilibrium_coefficient!(::Type{Val{1}}, q::Quadrature, ρ, u, T, a_n)
+    D = dimension(q)
+    for a = 1 : D
+        a_n[a] = ρ * u[a]
+    end
+    return a_n
+end
+
+function equilibrium_coefficient!(::Type{Val{2}}, q::Quadrature, ρ, u, T, a_n)
+    D = dimension(q)
     cs = 1 / q.speed_of_sound_squared
-    return ρ * (u * u' + cs * (T - 1) * I)
+    for a = 1 : D, b = 1 : D
+        a_n[a, b] = ρ * (u[a] * u[b] + cs * (T - 1) * I)
+    end
+    return a_n
 end
-function equilibrium_coefficient(::Type{Val{3}}, q::Quadrature, ρ, u, T)
+
+function equilibrium_coefficient!(::Type{Val{3}}, q::Quadrature, ρ, u, T, a_n)
     cs = 1 / q.speed_of_sound_squared
     D = dimension(q)
-    return ρ * [
-        u[a] * u[b] * u[c] + cs * (T - 1) * (
-            u[a] * δ(b, c) + u[b] * δ(a, c) + u[c] * δ(a, b)
+    for a in 1:D, b in 1:D, c in 1:D
+        a_n[a, b, c] = ρ * (u[a] * u[b] * u[c] + cs * (T - 1) * (u[a] * δ(b, c) + u[b] * δ(a, c) + u[c] * δ(a, b)))
+    end
+    return a_n
+end
+
+function equilibrium_coefficient!(::Type{Val{4}}, q::Quadrature, ρ, u, T, a_n)
+    cs = 1 / q.speed_of_sound_squared
+    D = dimension(q)
+    for a in 1:D, b in 1:D, c in 1:D, d in 1:D
+        a_n[a, b, c, d] = ρ * (
+            u[a] * u[b] * u[c] * u[d] +
+            cs *
+            (T - 1) *
+            (
+                u[a] * u[b] * δ(c, d) +
+                u[a] * u[c] * δ(b, d) +
+                u[a] * u[d] * δ(b, d) +
+                u[b] * u[c] * δ(a, d) +
+                u[b] * u[d] * δ(a, d) +
+                u[c] * u[d] * δ(a, b)
+            ) +
+            cs^2 * (T - 1)^2 * (δ(a, b) * δ(c, d) + δ(a, c) * δ(b, d) + δ(a, d) * δ(b, c))
         )
-        for a in 1:D, b in 1:D, c in 1:D
-    ]
-end
-function equilibrium_coefficient(::Type{Val{4}}, q::Quadrature, ρ, u, T)
-    cs = 1 / q.speed_of_sound_squared
-    D = dimension(q)
-    return ρ * [
-        u[a] * u[b] * u[c] * u[d] +
-        cs *
-        (T - 1) *
-        (
-            u[a] * u[b] * δ(c, d) +
-            u[a] * u[c] * δ(b, d) +
-            u[a] * u[d] * δ(b, d) +
-            u[b] * u[c] * δ(a, d) +
-            u[b] * u[d] * δ(a, d) +
-            u[c] * u[d] * δ(a, b)
-        ) +
-        cs^2 * (T - 1)^2 * (δ(a, b) * δ(c, d) + δ(a, c) * δ(b, d) + δ(a, d) * δ(b, c))
-        for a in 1:D, b in 1:D, c in 1:D, d in 1:D
-    ]
+    end
+    return a_n
 end
