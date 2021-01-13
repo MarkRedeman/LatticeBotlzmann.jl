@@ -8,7 +8,7 @@ function velocity!(
     ρ::T,
     u::VT,
 ) where {T <: Real, VT <: AbstractVector{T}, P <: AbstractVector{T}}
-    @inbounds for d in 1:dimension(q)
+    @inbounds for d in 1:length(u)
         u[d] = zero(T)
         for idx in 1:length(q.weights)
             u[d] += f[idx] * q.abscissae[d, idx]
