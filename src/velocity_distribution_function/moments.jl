@@ -1,6 +1,8 @@
 density(q::Quadrature, fs::P) where {N <: Int, P <: AbstractArray{<:Real, N}} =
     sum(fs, dims = N)
 density(q::Quadrature, f::P) where {P <: AbstractVector{<:Real}} = sum(f)
+@inbounds density(q::D2Q9, f::P) where {P <: AbstractVector{<:Real}} = f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8] + f[9]
+
 
 function velocity!(
     q::Quadrature,
@@ -15,6 +17,16 @@ function velocity!(
         end
         u[d] /= ρ
     end
+    return
+end
+@inbounds function velocity!(
+    q::D2Q9,
+    f::P,
+    ρ::T,
+    u::VT,
+) where {T <: Real, VT <: AbstractVector{T}, P <: AbstractVector{T}}
+    u[1] = (f[5] + f[6] + f[7] - (f[2] + f[3] + f[4])) / ρ
+    u[2] = (f[2]  + f[8] + f[9] - (f[4] + f[5] + f[6])) / ρ
     return
 end
 
